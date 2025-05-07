@@ -1,3 +1,6 @@
+import { Box } from "@mui/material";
+import { AppProvider } from '@toolpad/core/AppProvider';
+import { DashboardLayout } from '@toolpad/core/DashboardLayout';
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -23,10 +26,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
-      </body>
-    </html>
+    <AppProvider>
+      <html lang="en">
+        <body className={`${geistSans.variable} ${geistMono.variable}`}>
+          <DashboardLayout>
+            <Box sx={{ p: '32px' }}>
+              {children}
+            </Box>
+          </DashboardLayout>
+        </body>
+      </html>
+    </AppProvider>
   );
 }
