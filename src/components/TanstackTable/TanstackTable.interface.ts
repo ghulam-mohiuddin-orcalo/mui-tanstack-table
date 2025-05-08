@@ -1,6 +1,7 @@
 import {
   ColumnDef,
-  PaginationState
+  PaginationState,
+  OnChangeFn
 } from '@tanstack/react-table';
 export interface TableProps<TData extends object> {
   data: TData[];
@@ -18,7 +19,7 @@ export interface TableProps<TData extends object> {
   enableColumnOrdering?: boolean;
   enableColumnVisibility?: boolean;
   pageCount?: number;
-  onPaginationChange?: (pagination: { pageIndex: number; pageSize: number }) => void;
+  onPaginationChange?: OnChangeFn<PaginationState>;
   pagination: { pageIndex: number; pageSize: number };
   totalCount?: number;
 }

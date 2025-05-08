@@ -46,7 +46,6 @@ import {
   flexRender,
   FilterFn,
   SortingFn,
-  PaginationState
 } from '@tanstack/react-table';
 // import { rankItem } from '@tanstack/match-sorter-utils';
 import { TableProps } from './TanstackTable.interface';
