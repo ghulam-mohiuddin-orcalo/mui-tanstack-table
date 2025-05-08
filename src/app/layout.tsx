@@ -26,16 +26,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <AppProvider>
-      <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable}`}>
+
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <AppProvider>
           <DashboardLayout>
             <Box sx={{ p: '32px' }}>
               {children}
             </Box>
           </DashboardLayout>
-        </body>
-      </html>
-    </AppProvider>
+        </AppProvider>
+      </body>
+    </html>
   );
 }
