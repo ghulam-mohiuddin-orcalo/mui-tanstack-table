@@ -20,7 +20,8 @@ import {
   Box,
   Stack,
   Chip,
-  CircularProgress
+  CircularProgress,
+  Skeleton
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -215,28 +216,47 @@ export const TanstackTable = <TData extends object>({
         </TableHead>
 
         <TableBody>
-          {table.getRowModel().rows.map(row => (
-            <TableRow
-              key={row.id}
-              hover
-              onClick={() => handleRowClick(row)}
-              sx={{
-                cursor: onRowClick ? 'pointer' : 'default',
-                '&:last-child td': { borderBottom: 0 },
-              }}
-            >
-              {row.getVisibleCells().map(cell => (
-                <TableCell key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          {isLoading ?
+            Array(5).fill(null).map((_, index) => (
+              <TableRow key={index}>
+                {Array(memoizedColumns.length).fill(null).map((_, cellIndex) => (
+                  <TableCell key={cellIndex}>
+                    <Skeleton variant="rectangular" height={44} animation="wave" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            )) : table.getRowModel().rows.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={memoizedColumns.length} align="center">
+                  No data available
                 </TableCell>
-              ))}
-            </TableRow>
-          ))}
+              </TableRow>
+            ) : (
+              <>
+                {table.getRowModel().rows.map(row => (
+                  <TableRow
+                    key={row.id}
+                    hover
+                    onClick={() => handleRowClick(row)}
+                    sx={{
+                      cursor: onRowClick ? 'pointer' : 'default',
+                      '&:last-child td': { borderBottom: 0 },
+                    }}
+                  >
+                    {row.getVisibleCells().map(cell => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </>
+            )}
         </TableBody>
       </Table>
 
       {/* Pagination */}
-      {enablePagination && (
+      {enablePagination && data.length && (
         <TablePagination
           rowsPerPageOptions={[5, 10, 25, 50, 100]}
           component="div"
