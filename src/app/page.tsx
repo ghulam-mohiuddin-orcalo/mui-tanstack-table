@@ -74,7 +74,7 @@ export default function Home() {
 
     fetchData();
   }, [pagination]);
-  console.log('data::: ', data);
+
   const columns = [
     {
       accessorKey: 'name',
@@ -134,16 +134,16 @@ export default function Home() {
       <Divider sx={{ my: 5 }} />
 
       <TanstackTable
-        data={data}
+        data={data || []}
         columns={columns}
         isLoading={isLoading}
         enableRowSelection={true}
-        enableMultiRowSelection={false}
+        enableMultiRowSelection={true}
         enablePagination
         pagination={pagination}
         onPaginationChange={setPagination}
         totalCount={totalCount}
-
+        onRowSelectionChange={(selectedRows: any) => { console.log('Selected rowsouter:', selectedRows); }}
       />
     </Box>
   );

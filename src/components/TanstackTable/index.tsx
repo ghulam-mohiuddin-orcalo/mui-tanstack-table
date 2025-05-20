@@ -70,10 +70,13 @@ export const TanstackTable = <TData extends object>({
   onPaginationChange,
   pagination = { pageIndex: 0, pageSize: 5 },
   totalCount = 0,
+  onRowSelectionChange,
+  stickyHeader = false,
 }: TableProps<TData>) => {
 
   // State management
   const [rowSelection, setRowSelection] = useState({});
+  console.log('rowSelection', rowSelection);
 
   // Column definitions
   const memoizedColumns = useMemo<ColumnDef<TData>[]>(() => {
@@ -82,19 +85,29 @@ export const TanstackTable = <TData extends object>({
     if (enableRowSelection) {
       baseColumns.unshift({
         id: 'select',
-        header: ({ table }) => (
-          <Checkbox
-            indeterminate={table.getIsSomeRowsSelected()}
-            checked={table.getIsAllRowsSelected()}
-            onChange={table.getToggleAllRowsSelectedHandler()}
-          />
-        ),
-        cell: ({ row }) => (
+        header: enableMultiRowSelection
+          ? ({ table }) => (
+            <Checkbox
+              indeterminate={table.getIsSomeRowsSelected()}
+              checked={table.getIsAllRowsSelected()}
+              onChange={table.getToggleAllRowsSelectedHandler()}
+              disabled={data.length === 0}
+            />
+          )
+          : undefined,
+        cell: ({ row, table }) => (
           <Checkbox
             checked={row.getIsSelected()}
             disabled={!row.getCanSelect()}
-            indeterminate={row.getIsSomeSelected()}
-            onChange={row.getToggleSelectedHandler()}
+            indeterminate={enableMultiRowSelection && row.getIsSomeSelected()}
+            onChange={() => {
+              if (enableMultiRowSelection) {
+                row.getToggleSelectedHandler()(true);
+              } else {
+                table.resetRowSelection();
+                row.toggleSelected(true);
+              }
+            }}
           />
         ),
         size: 50,
@@ -102,7 +115,7 @@ export const TanstackTable = <TData extends object>({
     }
 
     return baseColumns;
-  }, [columns, enableRowSelection]);
+  }, [columns, enableRowSelection, enableMultiRowSelection]);
 
   // Table instance
   const table = useReactTable({
@@ -125,7 +138,17 @@ export const TanstackTable = <TData extends object>({
     // onGlobalFilterChange: setGlobalFilter,
     // onSortingChange: setSorting,
     // onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange: (selected) => {
+      // Update internal state
+      setRowSelection(selected);
+
+      // Call external callback if provided
+      if (onRowSelectionChange) {
+        const selectedRows = table.getSelectedRowModel().flatRows.map(row => row.original);
+        console.log('Selected rows:', selectedRows);
+        onRowSelectionChange(selectedRows);
+      }
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: enablePagination ? getPaginationRowModel() : undefined,
@@ -141,8 +164,9 @@ export const TanstackTable = <TData extends object>({
   };
 
   return (
-    <TableContainer component={Paper}>
-      <Table>
+    <TableContainer component={Paper} sx={{ maxHeight: stickyHeader ? 440 : 'none' }}>
+      {/* Table Header */}
+      <Table stickyHeader={stickyHeader}>
 
         <TableHead>
           {table.getHeaderGroups().map(headerGroup => (
@@ -256,7 +280,7 @@ export const TanstackTable = <TData extends object>({
       </Table>
 
       {/* Pagination */}
-      {enablePagination && data.length && (
+      {enablePagination && data.length !== 0 && (
         <TablePagination
           rowsPerPageOptions={[5, 10, 25, 50, 100]}
           component="div"
@@ -264,9 +288,11 @@ export const TanstackTable = <TData extends object>({
           rowsPerPage={pagination?.pageSize}
           page={pagination?.pageIndex}
           onPageChange={(_, page) => {
+            table.resetRowSelection();
             onPaginationChange?.({ ...pagination, pageIndex: page });
           }}
           onRowsPerPageChange={(e) => {
+            table.resetRowSelection();
             const pageSize = Number(e.target.value);
             onPaginationChange?.({
               pageIndex: 0, // Reset to first page when page size changes

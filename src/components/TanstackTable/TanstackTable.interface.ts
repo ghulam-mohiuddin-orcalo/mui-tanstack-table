@@ -22,4 +22,6 @@ export interface TableProps<TData extends object> {
   onPaginationChange?: OnChangeFn<PaginationState>;
   pagination: { pageIndex: number; pageSize: number };
   totalCount?: number;
+  onRowSelectionChange?: (selectedRows: TData[]) => void;
+  stickyHeader?: boolean;
 }
